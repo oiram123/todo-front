@@ -33,18 +33,34 @@ export default function Home() {
     };
   }, []);
 
-  const handleDragEnd = (result, column) => {
+  const handleDragEnd = (result) => {
     if (!result.destination) return;
     const { source, destination } = result;
-    console.log(source, destination);
-    if (source.index === destination.index) return;
-    const newItems = Array.from(column);
-    console.log(newItems);
-    const [removed] = newItems.splice(source.index, 1);
-    newItems.splice(destination.index, 0, removed);
-    // setItems(newItems);
-  };
+    // if (source.index === destination.index) return;
+    console.log('source', source)
+    if (source.droppableId === "Todo") {
+      const newToDoItems = Array.from(toDoItems);
+      const [removed] = newToDoItems.splice(source.index, 1);
+      newToDoItems.splice(destination.index, 0, removed);
+      console.log('newTodo', newToDoItems)
+      setToDoItems(newToDoItems);
+    } else if (source.droppableId === "Doing") {
+      const newDoingItems = Array.from(doingItems);
+      const [removed] = newDoingItems.splice(source.index, 1);
+      newDoingItems.splice(destination.index, 0, removed);
+      console.log('newDoingItems', newDoingItems)
 
+      setDoingItems(newDoingItems);
+    } else if (source.droppableId === "Done") {
+      const newDoneItems = Array.from(doneItems);
+      const [removed] = newDoneItems.splice(source.index, 1);
+      console.log('removed',removed)
+      newDoneItems.splice(destination.index, 0, removed);
+      console.log('newDoneItems', newDoneItems)
+
+      setDoneItems(newDoneItems);
+    }
+  };
 
 
   return (
@@ -92,13 +108,13 @@ export default function Home() {
                 </h2>
                 <div className="h-full py-6 px-4 sm:px-6 lg:px-8">
                   {/* To Do area */}
-                  <Droppable droppableId="to-do">
+                  <Droppable droppableId="Todo">
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps}>
                         {toDoItems.map((item, index) => (
                           <Draggable
                             key={item._id}
-                            draggableId={item.status}
+                            draggableId={item._id}
                             index={index}
                           >
                             {(provided) => (
@@ -137,13 +153,13 @@ export default function Home() {
 
                 <div className="h-full py-6 px-4 sm:px-6 lg:px-8">
                   {/* Doing area */}
-                  <Droppable droppableId="doing">
+                  <Droppable droppableId="Doing">
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps}>
                         {doingItems.map((item, index) => (
                           <Draggable
                             key={item._id}
-                            draggableId={item.status}
+                            draggableId={item._id}
                             index={index}
                           >
                             {(provided) => (
@@ -183,13 +199,13 @@ export default function Home() {
 
                 <div className="h-full py-6 px-4 sm:px-6 lg:px-8">
                   {/* Done area */}
-                  <Droppable droppableId="done">
+                  <Droppable droppableId="Done">
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps}>
                         {doneItems.map((item, index) => (
                           <Draggable
                             key={item._id}
-                            draggableId={item.status}
+                            draggableId={item._id}
                             index={index}
                           >
                             {(provided) => (
