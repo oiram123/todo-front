@@ -20,14 +20,26 @@ export default function Home() {
     { id: "task-8", content: "Task 8" },
   ]);
 
-  const handleDragEnd = (result, column, setItems) => {
+  const handleDragEnd = (result) => {
     if (!result.destination) return;
     const { source, destination } = result;
     if (source.index === destination.index) return;
-    const newItems = Array.from(column);
-    const [removed] = newItems.splice(source.index, 1);
-    newItems.splice(destination.index, 0, removed);
-    setItems(newItems);
+    if (source.droppableId === "to-do") {
+      const newToDoItems = Array.from(toDoItems);
+      const [removed] = newToDoItems.splice(source.index, 1);
+      newToDoItems.splice(destination.index, 0, removed);
+      setToDoItems(newToDoItems);
+    } else if (source.droppableId === "doing") {
+      const newDoingItems = Array.from(doingItems);
+      const [removed] = newDoingItems.splice(source.index, 1);
+      newDoingItems.splice(destination.index, 0, removed);
+      setDoingItems(newDoingItems);
+    } else if (source.droppableId === "done") {
+      const newDoneItems = Array.from(doneItems);
+      const [removed] = newDoneItems.splice(source.index, 1);
+      newDoneItems.splice(destination.index, 0, removed);
+      setDoneItems(newDoneItems);
+    }
   };
 
   return (
@@ -79,69 +91,37 @@ export default function Home() {
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps}>
                         {toDoItems.map((item, index) => (
-                          <Draggable
-                            key={item.id}
-                            draggableId={item.id}
-                            index={index}
-                          >
+                          <Draggable key={item.id} draggableId={item.id} index={index}>
                             {(provided) => (
                               <div
                                 ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="bg-white rounded-lg shadow-lg border border-gray-400 mb-4 p-4 text-gray-800"
-                              >
-                                <h2 className="text-lg font-bold mb-2">
-                                  {item.content}
-                                </h2>
-                                <p className="mb-4">
-                                  Task description goes here.
-                                </p>
-                                <button className="block w-20 justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                  Delete 
-                                </button>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </div>
-              </div>
+                                {...provided.draggableProps} {...provided.dragHandleProps}> <div className="bg-white shadow overflow-hidden sm:rounded-md"> <div className="px-4 py-5 sm:px-6"> <h3 className="text-lg leading-6 font-medium text-gray-900"> {item.content} </h3> </div> </div> </div>)} </Draggable>))} {provided.placeholder} </div>)} </Droppable> </div> </div>
+
+              {/* Middle column */}
               <div className="bg-white lg:min-w-0 lg:flex-1 border-r border-gray-400">
                 <h2 className="text-2xl font-bold px-6 py-2 bg-gray-800 text-white">
                   Doing
                 </h2>
-
                 <div className="h-full py-6 px-4 sm:px-6 lg:px-8">
                   {/* Doing area */}
                   <Droppable droppableId="doing">
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps}>
                         {doingItems.map((item, index) => (
-                          <Draggable
-                            key={item.id}
-                            draggableId={item.id}
-                            index={index}
-                          >
+                          <Draggable key={item.id} draggableId={item.id} index={index}>
                             {(provided) => (
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className="bg-white rounded-lg shadow-lg border border-gray-400 mb-4 p-4 text-gray-800"
                               >
-                                <h2 className="text-lg font-bold mb-2">
-                                  {item.content}
-                                </h2>
-                                <p className="mb-4">
-                                  Task description goes here.
-                                </p>
-                                <button className="block w-20 justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                  Delete
-                                </button>
+                                <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                                  <div className="px-4 py-5 sm:px-6">
+                                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                      {item.content}
+                                    </h3>
+                                  </div>
+                                </div>
                               </div>
                             )}
                           </Draggable>
@@ -153,38 +133,31 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white lg:min-w-0 lg:flex-1">
+              {/* Right sidebar */}
+              <div className="bg-white lg:w-80">
                 <h2 className="text-2xl font-bold px-6 py-2 bg-gray-800 text-white">
                   Done
                 </h2>
-
                 <div className="h-full py-6 px-4 sm:px-6 lg:px-8">
                   {/* Done area */}
                   <Droppable droppableId="done">
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps}>
                         {doneItems.map((item, index) => (
-                          <Draggable
-                            key={item.id}
-                            draggableId={item.id}
-                            index={index}
-                          >
+                          <Draggable key={item.id} draggableId={item.id} index={index}>
                             {(provided) => (
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className="bg-white rounded-lg shadow-lg border border-gray-400 mb-4 p-4 text-gray-800"
                               >
-                                <h2 className="text-lg font-bold mb-2">
-                                  {item.content}
-                                </h2>
-                                <p className="mb-4">
-                                  Task description goes here.
-                                </p>
-                                <button className="block w-20 justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                  Delete
-                                </button>
+                                <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                                  <div className="px-4 py-5 sm:px-6">
+                                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                      {item.content}
+                                    </h3>
+                                  </div>
+                                </div>
                               </div>
                             )}
                           </Draggable>
