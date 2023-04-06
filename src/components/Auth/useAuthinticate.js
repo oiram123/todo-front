@@ -12,7 +12,7 @@ const useAuthenticate = () => {
     let accessToken = localStorage.getItem("accessToken");
     let isAuth = localStorage.getItem("isAuthenticated");
 
-    if (isAuth && accessToken) {
+    if (isAuth) {
       console.log("you are authinticated");
       setIsAuthenticated(true);
       setTokens({

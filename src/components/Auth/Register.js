@@ -21,7 +21,8 @@ export default function Register() {
         "https://todo-app-1u8v.onrender.com/api/v1/auth/register",
         userParams
       );
-      console.log(res.data);
+      localStorage.setItem("userId", res.data.userId)
+      localStorage.setItem("isAuthenticated", true)
       navigate("/home");
     } catch (error) {
       console.log("err", error);
