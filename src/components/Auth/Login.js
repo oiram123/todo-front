@@ -21,6 +21,7 @@ export default function Login() {
       console.log(userParams)
      const res = await axios.post('https://todo-app-1u8v.onrender.com/api/v1/auth/login', userParams);
      const {user, token} = res.data
+     console.log(user, token)
       login(user, token)
       navigate("/home");
     } catch (error) {

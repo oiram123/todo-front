@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Popover } from "@headlessui/react";
 
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -10,8 +10,10 @@ import {
 import CreateTodo from "./CreateTodo";
 import EditTodo from "./EditTodo";
 import axios from "axios";
+import useAuthenticate from "./Auth/useAuthinticate";
 
 export default function Home() {
+  useAuthenticate();
   const [createTask, setCreateTask] = useState(false);
   const [editTask, setEditTask] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
@@ -19,14 +21,19 @@ export default function Home() {
   const [doingItems, setDoingItems] = useState([]);
   const [doneItems, setDoneItems] = useState([]);
 
+  const userId = localStorage.getItem("userId")
+  console.log('userId', userId)
+
   useEffect(() => {
     let isMount = true;
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `https://todo-app-1u8v.onrender.com/api/v1/todo/getAllTodo/641eea71ab23cc7c6f774ec2`
+          `https://todo-app-1u8v.onrender.com/api/v1/todo/getAllTodo/${userId}`
         );
         const data = response.data.data;
+
+        console.log('data', data)
 
         if (isMount) {
           setToDoItems(data.filter((task) => task.status === "Todo"));
@@ -42,7 +49,9 @@ export default function Home() {
     return () => {
       isMount = false;
     };
-  }, [createTask, editTask, editItemId,toDoItems, doingItems, doneItems]);
+  }, [createTask, editTask, editItemId, userId]);
+
+
 
 
   const deleteTask = async (todoID) => {
@@ -183,6 +192,7 @@ export default function Home() {
                       <CreateTodo
                         createTask={createTask}
                         setCreateTask={setCreateTask}
+                        userId={userId}
                       />
                     )}
                   </>

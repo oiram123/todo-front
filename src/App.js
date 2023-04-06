@@ -17,10 +17,8 @@ function App() {
     setUser(user);
     setTokens(tokens);
     localStorage.setItem("isAuthenticated", true)
-    localStorage.setItem("refreshTokens", tokens['refresh'].token)
-    localStorage.setItem("expireTime", tokens['refresh'].expires)
-    localStorage.setItem("accessTokens", tokens['access'].token)
-
+    localStorage.setItem("accessToken", tokens)
+    localStorage.setItem("userId", user._id)
   };
   return (
     <AuthContext.Provider

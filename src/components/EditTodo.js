@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { Fragment, useRef } from "react";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { BookmarkSquareIcon } from "@heroicons/react/20/solid";
 import axios from "axios";
 
 export default function Edit({ editTask,closeEdit, todoId }) {
@@ -32,19 +32,19 @@ export default function Edit({ editTask,closeEdit, todoId }) {
     }
   }, [todoId]);
 
-  const createTaskFunc = () => {
-    const createParam = {
+  const editTaskFunc = () => {
+    const editParam = {
       title,
       content,
       todoID:todoId,
     };
 
-    console.log(createParam);
+    console.log(editParam);
 
     axios
       .patch(
         "https://todo-app-1u8v.onrender.com/api/v1/todo/updateTodo",
-        createParam
+        editParam
       )
       .then((res) => {
         console.log(res);
@@ -86,7 +86,7 @@ export default function Edit({ editTask,closeEdit, todoId }) {
               </svg>
             </button>
             <h1 className="text-xl font-bold text-center mb-4">
-              Create your task
+              Edit your task
             </h1>
             <div className="form-group">
               <label
@@ -120,11 +120,11 @@ export default function Edit({ editTask,closeEdit, todoId }) {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => createTaskFunc()}
+                onClick={() => editTaskFunc()}
                 className="inline-flex items-center gap-x-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                Create Task
+                <BookmarkSquareIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+                Save
               </button>
             </div>
           </div>

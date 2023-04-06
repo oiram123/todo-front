@@ -4,7 +4,7 @@ import { Fragment, useRef } from "react";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import axios from "axios";
 
-export default function CreateTodo({ createTask, setCreateTask }) {
+export default function CreateTodo({ createTask, setCreateTask, userId }) {
   const cancelButtonRef = useRef(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -13,7 +13,7 @@ export default function CreateTodo({ createTask, setCreateTask }) {
     const createParam = {
       title,
       content,
-      userId: "641eea71ab23cc7c6f774ec2",
+      userId,
     };
 
     console.log(createParam);
