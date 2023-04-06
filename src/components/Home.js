@@ -129,6 +129,12 @@ export default function Home() {
       status: newStatus,
     };
 
+    sourceArray.splice(source.index, 1);
+
+    setToDoItems([...toDoItems]);
+    setDoingItems([...doingItems]);
+    setDoneItems([...doneItems]);
+    
     try {
       const res = await axios.patch(
         `https://todo-app-1u8v.onrender.com/api/v1/todo/updateStatusTodo`,
@@ -139,11 +145,6 @@ export default function Home() {
       console.log("error status", error);
     }
 
-    sourceArray.splice(source.index, 1);
-
-    setToDoItems([...toDoItems]);
-    setDoingItems([...doingItems]);
-    setDoneItems([...doneItems]);
   };
 
   return (
