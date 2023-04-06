@@ -1,9 +1,20 @@
 import { Fragment, useState, useEffect } from "react";
-import { Disclosure } from "@headlessui/react";
+import { Popover } from "@headlessui/react";
+
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import {
+  TrashIcon,
+  PencilSquareIcon,
+  PlusIcon,
+} from "@heroicons/react/20/solid";
+import CreateTodo from "./CreateTodo";
+import EditTodo from "./EditTodo";
 import axios from "axios";
 
 export default function Home() {
+  const [createTask, setCreateTask] = useState(false);
+  const [editTask, setEditTask] = useState(false);
+  const [editItemId, setEditItemId] = useState(null);
   const [toDoItems, setToDoItems] = useState([]);
   const [doingItems, setDoingItems] = useState([]);
   const [doneItems, setDoneItems] = useState([]);
@@ -31,37 +42,95 @@ export default function Home() {
     return () => {
       isMount = false;
     };
-  }, []);
+  }, [createTask, editTask, editItemId,toDoItems, doingItems, doneItems]);
 
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
-    const { source, destination } = result;
-    // if (source.index === destination.index) return;
-    console.log('source', source)
-    if (source.droppableId === "Todo") {
-      const newToDoItems = Array.from(toDoItems);
-      const [removed] = newToDoItems.splice(source.index, 1);
-      newToDoItems.splice(destination.index, 0, removed);
-      console.log('newTodo', newToDoItems)
-      setToDoItems(newToDoItems);
-    } else if (source.droppableId === "Doing") {
-      const newDoingItems = Array.from(doingItems);
-      const [removed] = newDoingItems.splice(source.index, 1);
-      newDoingItems.splice(destination.index, 0, removed);
-      console.log('newDoingItems', newDoingItems)
 
-      setDoingItems(newDoingItems);
-    } else if (source.droppableId === "Done") {
-      const newDoneItems = Array.from(doneItems);
-      const [removed] = newDoneItems.splice(source.index, 1);
-      console.log('removed',removed)
-      newDoneItems.splice(destination.index, 0, removed);
-      console.log('newDoneItems', newDoneItems)
-
-      setDoneItems(newDoneItems);
+  const deleteTask = async (todoID) => {
+    try {
+     await axios.delete(
+        `https://todo-app-1u8v.onrender.com/api/v1/todo/deleteTodo/${todoID}`
+      );
+      setToDoItems(toDoItems.filter((task) => task._id !== todoID));
+      setDoingItems(doingItems.filter((task) => task._id !== todoID));
+      setDoneItems(doneItems.filter((task) => task._id !== todoID));
+    } catch (error) {
+      console.log(error);
     }
   };
 
+  const handleEdit = (itemId) => {
+    setCreateTask(true);
+    setEditItemId(itemId);
+  };
+
+  const closeEdit = () => {
+    setEditTask(false);
+    setEditItemId(null);
+  };
+
+
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+
+    console.log(source.index, destination.index);
+
+    if (source.droppableId === destination.droppableId) return;
+
+    const getItem = (droppableId, index) => {
+      console.log("getItem called with droppableId:", droppableId);
+      switch (droppableId) {
+        case "Todo":
+          console.log("getItem matched case Todo");
+          return [toDoItems[index], toDoItems];
+        case "Doing":
+          console.log("getItem matched case Doing");
+          return [doingItems[index], doingItems];
+        case "Done":
+          console.log("getItem matched case Done");
+          return [doneItems[index], doneItems];
+        default:
+          console.log("getItem did not match any case");
+          return null;
+      }
+    };
+
+    const [removedTask, sourceArray] = getItem(
+      source.droppableId,
+      source.index
+    );
+    //if the task in rmoved from the array, return;
+    if (!removedTask) return;
+
+    const [updatedTask, destinationArray] = getItem(
+      destination.droppableId,
+      destination.index
+    );
+    destinationArray.splice(destination.index, 0, removedTask);
+
+    const newStatus = destination.droppableId;
+    const updatedTaskData = {
+      ...updatedTask,
+      taskId: removedTask._id,
+      status: newStatus,
+    };
+
+    try {
+      const res = await axios.patch(
+        `https://todo-app-1u8v.onrender.com/api/v1/todo/updateStatusTodo`,
+        updatedTaskData
+      );
+      console.log(res);
+    } catch (error) {
+      console.log("error status", error);
+    }
+
+    sourceArray.splice(source.index, 1);
+
+    setToDoItems([...toDoItems]);
+    setDoingItems([...doingItems]);
+    setDoneItems([...doneItems]);
+  };
 
   return (
     <>
@@ -76,25 +145,51 @@ export default function Home() {
       />
       <div className="relative flex min-h-screen flex-col">
         {/* Navbar */}
-        <div className="flex-shrink-0 bg-black">
-          <>
-            <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8">
-              <div className="relative flex h-16 items-center justify-between">
-                {/* Logo section */}
-                <div className="flex items-center px-2 lg:px-0 xl:w-64">
-                  <div className="flex-shrink-0">
-                    <img
-                      className="h-8 w-auto"
-                      src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=300"
-                      alt="Your Company"
-                    />
-                  </div>
+        <div className="flex-shrink-0 bg-black h-20">
+          <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 h-full">
+            <div className="relative flex h-full items-center justify-between">
+              {/* Logo section */}
+              <div className="flex items-center px-2 lg:px-0 xl:w-64">
+                <div className="flex-shrink-0">
+                  <img
+                    className="h-10 w-auto"
+                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=300"
+                    alt="Your Company"
+                  />
                 </div>
+                <h1 className="text-white text-2xl font-bold mx-4">
+                  TO DO APP
+                </h1>
               </div>
+              {/* Button section */}
+              <Popover
+                as="div"
+                className="relative inset-0 z-10 overflow-y-auto"
+                onClose={() => {}}
+              >
+                {({ open }) => (
+                  <>
+                    <Popover.Button
+                      className="inline-flex items-center gap-x-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      onMouseDown={() => setCreateTask(true)}
+                    >
+                      <PlusIcon
+                        className="-ml-0.5 h-5 w-5"
+                        aria-hidden="true"
+                      />
+                      Create New Task
+                    </Popover.Button>
+                    {createTask && (
+                      <CreateTodo
+                        createTask={createTask}
+                        setCreateTask={setCreateTask}
+                      />
+                    )}
+                  </>
+                )}
+              </Popover>{" "}
             </div>
-
-            <h1 style={{ color: "white" }}>TO DO APP</h1>
-          </>
+          </div>
         </div>
 
         {/* 3 column wrapper */}
@@ -129,12 +224,46 @@ export default function Home() {
                                 </h2>
                                 <p className="mb-4">{item.content}</p>
                                 <div className="flex justify-between">
-                                  <button className="block w-20 justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteTask(item._id)}
+                                    className="inline-flex items-center gap-x-1.5 rounded-md bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                  >
+                                    <TrashIcon
+                                      className="-ml-0.5 h-5 w-5"
+                                      aria-hidden="true"
+                                    />
                                     Delete
                                   </button>
-                                  <button className="block w-20 justify-right px-4 py-2 bg-blue-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                    Edit
-                                  </button>
+                                  <Popover
+                                    as="div"
+                                    className="inset-0 20 overflow-y-auto"
+                                    onClose={() => {}}
+                                  >
+                                    {({ open }) => (
+                                      <>
+                                        <Popover.Button
+                                          className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                          onMouseDown={() =>
+                                            handleEdit(item._id)
+                                          }
+                                        >
+                                          <PencilSquareIcon
+                                            className="-ml-0.5 h-5 w-5"
+                                            aria-hidden="true"
+                                          />
+                                          Edit
+                                        </Popover.Button>
+                                        {editItemId === item._id && (
+                                          <EditTodo
+                                            editTask={editTask}
+                                            closeEdit={closeEdit}
+                                            todoId={editItemId}
+                                          />
+                                        )}
+                                      </>
+                                    )}
+                                  </Popover>{" "}
                                 </div>
                               </div>
                             )}
@@ -174,12 +303,45 @@ export default function Home() {
                                 </h2>
                                 <p className="mb-4">{item.content}</p>
                                 <div className="flex justify-between">
-                                  <button className="block w-20 justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteTask(item._id)}
+                                    className="inline-flex items-center gap-x-1.5 rounded-md bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                  >
+                                    <TrashIcon
+                                      className="-ml-0.5 h-5 w-5"
+                                      aria-hidden="true"
+                                    />
                                     Delete
                                   </button>
-                                  <button className="block w-20 justify-right px-4 py-2 bg-blue-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                    Edit
-                                  </button>
+                                  <Popover
+                                    as="div"
+                                    className="inset-0 20 overflow-y-auto"
+                                    onClose={() => {}}
+                                  >
+                                    {({ open }) => (
+                                      <>
+                                        <Popover.Button
+                                          className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                          onMouseDown={() =>
+                                            handleEdit(item._id)
+                                          }                                        >
+                                          <PencilSquareIcon
+                                            className="-ml-0.5 h-5 w-5"
+                                            aria-hidden="true"
+                                          />
+                                          Edit
+                                        </Popover.Button>
+                                        {editItemId === item._id && (
+                                          <EditTodo
+                                            editTask={editTask}
+                                            closeEdit={closeEdit}
+                                            todoId={editItemId}
+                                          />
+                                        )}
+                                      </>
+                                    )}
+                                  </Popover>{" "}
                                 </div>
                               </div>
                             )}
@@ -220,12 +382,46 @@ export default function Home() {
                                 </h2>
                                 <p className="mb-4">{item.content}</p>
                                 <div className="flex justify-between">
-                                  <button className="block w-20 justify-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteTask(item._id)}
+                                    className="inline-flex items-center gap-x-1.5 rounded-md bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                  >
+                                    <TrashIcon
+                                      className="-ml-0.5 h-5 w-5"
+                                      aria-hidden="true"
+                                    />
                                     Delete
                                   </button>
-                                  <button className="block w-20 justify-right px-4 py-2 bg-blue-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                    Edit
-                                  </button>
+                                  <Popover
+                                    as="div"
+                                    className="inset-0 20 overflow-y-auto"
+                                    onClose={() => {}}
+                                  >
+                                    {({ open }) => (
+                                      <>
+                                        <Popover.Button
+                                          className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                          onMouseDown={() =>
+                                            handleEdit(item._id)
+                                          }                                        
+                                          >
+                                          <PencilSquareIcon
+                                            className="-ml-0.5 h-5 w-5"
+                                            aria-hidden="true"
+                                          />
+                                          Edit
+                                        </Popover.Button>
+                                        {editItemId === item._id && (
+                                          <EditTodo
+                                            editTask={editTask}
+                                            closeEdit={closeEdit}
+                                            todoId={editItemId}
+                                          />
+                                        )}
+                                      </>
+                                    )}
+                                  </Popover>{" "}
                                 </div>
                               </div>
                             )}
