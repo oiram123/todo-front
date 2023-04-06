@@ -20,7 +20,7 @@ const useAuthenticate = () => {
       });
     } else if (isAuth === false || accessToken === null) {
       console.log("go to login");
-      navigate("/login");
+      navigate("/");
     }
   }, [isAuthenticated, navigate, setIsAuthenticated]);
 };

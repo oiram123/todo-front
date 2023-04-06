@@ -6,14 +6,17 @@ import {
   TrashIcon,
   PencilSquareIcon,
   PlusIcon,
+  ArrowLongRightIcon,
 } from "@heroicons/react/20/solid";
 import CreateTodo from "./CreateTodo";
 import EditTodo from "./EditTodo";
 import axios from "axios";
 import useAuthenticate from "./Auth/useAuthinticate";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   useAuthenticate();
+  const navigate = useNavigate();
   const [createTask, setCreateTask] = useState(false);
   const [editTask, setEditTask] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
@@ -21,8 +24,14 @@ export default function Home() {
   const [doingItems, setDoingItems] = useState([]);
   const [doneItems, setDoneItems] = useState([]);
 
-  const userId = localStorage.getItem("userId")
-  console.log('userId', userId)
+  const userId = localStorage.getItem("userId");
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("accessToken");
+    navigate("/"); // navigate to login
+  };
 
   useEffect(() => {
     let isMount = true;
@@ -33,7 +42,7 @@ export default function Home() {
         );
         const data = response.data.data;
 
-        console.log('data', data)
+        console.log("data", data);
 
         if (isMount) {
           setToDoItems(data.filter((task) => task.status === "Todo"));
@@ -51,12 +60,9 @@ export default function Home() {
     };
   }, [createTask, editTask, editItemId, userId]);
 
-
-
-
   const deleteTask = async (todoID) => {
     try {
-     await axios.delete(
+      await axios.delete(
         `https://todo-app-1u8v.onrender.com/api/v1/todo/deleteTodo/${todoID}`
       );
       setToDoItems(toDoItems.filter((task) => task._id !== todoID));
@@ -76,7 +82,6 @@ export default function Home() {
     setEditTask(false);
     setEditItemId(null);
   };
-
 
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
@@ -171,33 +176,45 @@ export default function Home() {
                 </h1>
               </div>
               {/* Button section */}
-              <Popover
-                as="div"
-                className="relative inset-0 z-10 overflow-y-auto"
-                onClose={() => {}}
-              >
-                {({ open }) => (
-                  <>
-                    <Popover.Button
-                      className="inline-flex items-center gap-x-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                      onMouseDown={() => setCreateTask(true)}
-                    >
-                      <PlusIcon
-                        className="-ml-0.5 h-5 w-5"
-                        aria-hidden="true"
-                      />
-                      Create New Task
-                    </Popover.Button>
-                    {createTask && (
-                      <CreateTodo
-                        createTask={createTask}
-                        setCreateTask={setCreateTask}
-                        userId={userId}
-                      />
-                    )}
-                  </>
-                )}
-              </Popover>{" "}
+              <div className="flex items-center gap-x-4">
+                <Popover
+                  as="div"
+                  className="relative inset-0 z-10 overflow-y-auto"
+                  onClose={() => {}}
+                >
+                  {({ open }) => (
+                    <>
+                      <Popover.Button
+                        className="inline-flex items-center gap-x-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        onMouseDown={() => setCreateTask(true)}
+                      >
+                        <PlusIcon
+                          className="-ml-0.5 h-5 w-5"
+                          aria-hidden="true"
+                        />
+                        Create New Task
+                      </Popover.Button>
+                      {createTask && (
+                        <CreateTodo
+                          createTask={createTask}
+                          setCreateTask={setCreateTask}
+                          userId={userId}
+                        />
+                      )}
+                    </>
+                  )}
+                </Popover>
+                <button
+                  className="inline-flex items-center gap-x-2.5 rounded-md bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  onClick={handleLogout}
+                >
+                  <ArrowLongRightIcon
+                    className="-ml-0.5 h-5 w-5"
+                    aria-hidden="true"
+                  />
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -335,7 +352,8 @@ export default function Home() {
                                           className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                           onMouseDown={() =>
                                             handleEdit(item._id)
-                                          }                                        >
+                                          }
+                                        >
                                           <PencilSquareIcon
                                             className="-ml-0.5 h-5 w-5"
                                             aria-hidden="true"
@@ -414,8 +432,8 @@ export default function Home() {
                                           className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                           onMouseDown={() =>
                                             handleEdit(item._id)
-                                          }                                        
-                                          >
+                                          }
+                                        >
                                           <PencilSquareIcon
                                             className="-ml-0.5 h-5 w-5"
                                             aria-hidden="true"

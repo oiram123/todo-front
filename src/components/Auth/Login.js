@@ -3,29 +3,33 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AuthContext from "./AuthContext";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const { login } = useContext(AuthContext);
 
-
   const Login = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
     const userParams = {
       email,
       password,
-    }
+    };
     try {
-      console.log(userParams)
-     const res = await axios.post('https://todo-app-1u8v.onrender.com/api/v1/auth/login', userParams);
-     const {user, token} = res.data
-     console.log(user, token)
-      login(user, token)
+      console.log(userParams);
+      const res = await axios.post(
+        "https://todo-app-1u8v.onrender.com/api/v1/auth/login",
+        userParams
+      );
+      const { user, token } = res.data;
+      console.log(user, token);
+      login(user, token);
       navigate("/home");
     } catch (error) {
-      console.log("err", error);
+      setError(error.response.data.message);
     }
   };
 
@@ -60,6 +64,7 @@ export default function Login() {
                   className="relative block w-full rounded-t-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   placeholder="Email address"
                 />
+                {error && <p className="text-red-500">{error}</p>}
               </div>
               <div>
                 <label htmlFor="password" className="sr-only">
@@ -75,17 +80,18 @@ export default function Login() {
                   className="relative block w-full rounded-b-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   placeholder="Password"
                 />
+                {error && <p className="text-red-500">{error}</p>}
               </div>
             </div>
 
             <div className="flex items-center">
               <div className="text-sm">
-                <a
-                  href="#"
+                <Link
+                  to="register"
                   className="font-medium text-indigo-600 hover:text-indigo-500"
                 >
                   Don't have an account? Register.
-                </a>
+                </Link>
               </div>
             </div>
 
